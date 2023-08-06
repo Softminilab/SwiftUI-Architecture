@@ -18,4 +18,6 @@ Todolist
 
 
 
-<video src="https://github.com/Softminilab/SwiftUI-Architecture/blob/main/todolist-mvvm/video.mov"></video>
+
+https://github.com/Softminilab/SwiftUI-Architecture/assets/717235/c140383d-1279-4471-9f78-504d9a0f336f
+
