@@ -1,0 +1,105 @@
+首先，定义应用程序状态（State）：
+
+import Foundation
+
+struct AppState {
+    var items: [String] = []
+    var isLoading: Bool = false
+}
+
+接下来，定义动作类型（Actions）：
+
+import Foundation
+
+enum AppAction {
+    case addItem(String)
+    case removeItem(Int)
+    case fetchData
+    case dataFetched([String])
+    case startLoading
+    case stopLoading
+}
+
+创建状态更新逻辑（Reducers）：
+
+import Foundation
+
+func appReducer(state: inout AppState, action: AppAction) {
+    switch action {
+    case .addItem(let item):
+        state.items.append(item)
+    case .removeItem(let index):
+        state.items.remove(at: index)
+    case .dataFetched(let data):
+        state.items = data
+    case .startLoading:
+        state.isLoading = true
+    case .stopLoading:
+        state.isLoading = false
+    default:
+        break
+    }
+}
+
+现在，让我们定义一个模拟网络请求的函数：
+
+import Foundation
+
+func fetchDataFromNetwork(completion: @escaping ([String]) -> Void) {
+    DispatchQueue.global().async {
+        // 模拟异步网络请求
+        sleep(2)  // 模拟请求延迟
+        completion(["Data 1", "Data 2"])
+    }
+}
+
+接下来，创建Redux Store和处理副作用的部分：
+
+import Foundation
+
+class AppStore {
+    private var state: AppState
+    private var reducer: (inout AppState, AppAction) -> Void
+    private var sideEffect: (AppAction) -> Void
+
+    init(initialState: AppState, reducer: @escaping (inout AppState, AppAction) -> Void, sideEffect: @escaping (AppAction) -> Void) {
+        self.state = initialState
+        self.reducer = reducer
+        self.sideEffect = sideEffect
+    }
+
+    func dispatch(action: AppAction) {
+        reducer(&state, action)
+
+        // 处理副作用
+        sideEffect(action)
+    }
+}
+
+最后，使用Redux Store来执行操作和网络请求：
+
+let store = AppStore(initialState: AppState(), reducer: appReducer) { action in
+    // 处理副作用
+    switch action {
+    case .fetchData:
+        store.dispatch(.startLoading)
+        fetchDataFromNetwork { data in
+            store.dispatch(.dataFetched(data))
+            store.dispatch(.stopLoading)
+        }
+    default:
+        break
+    }
+}
+
+// 添加项目
+store.dispatch(.addItem("Task 1"))
+store.dispatch(.addItem("Task 2"))
+
+// 删除项目
+store.dispatch(.removeItem(0))
+
+// 模拟网络请求
+store.dispatch(.fetchData)
+
+在这个示例中，我们手动实现了Redux架构的各个部分，包括状态、动作、状态更新逻辑、Redux Store以及副作用的处理。当执行fetchData动作时，副作用部分模拟了异步网络请求，并在请求完成后更新应用状态。这个示例演示了如何使用Redux模式来管理应用状态和处理副作用，即网络请求。
